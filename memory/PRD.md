@@ -6,43 +6,41 @@ Build a markdown-based note-taking application like Notion. Fully responsive, sl
 ## Architecture
 - **Frontend-only**: React + Tailwind CSS + Shadcn UI
 - **Editor**: Tiptap WYSIWYG (StarterKit + TaskList + Highlight + Typography)
-- **Storage**: Browser localStorage (keys: notesApp_notes, notesApp_folders, notesApp_tags, notesApp_theme)
+- **Storage**: Browser localStorage
 - **PDF Export**: html2pdf.js
-- **Theme**: CSS custom properties (--n-*) with .dark class on <html>
+- **Theme**: CSS custom properties with .dark class
 
 ## What's Been Implemented
-### Phase 1 (April 19, 2026)
+### Phase 1 - Core (April 19, 2026)
 - [x] Notion-style WYSIWYG tiptap editor with formatting toolbar
-- [x] Sidebar with folder navigation, note list, search trigger
-- [x] Folder CRUD (create, rename, delete)
-- [x] Note CRUD (create, edit, delete)
-- [x] Tag system with 6 colored options
-- [x] Global search via Cmd+K
-- [x] Cover images (3 photos + 6 colors)
-- [x] Responsive sidebar (collapsible on mobile)
-- [x] Typography: Outfit/Figtree/JetBrains Mono
+- [x] Folder CRUD, Note CRUD, Tag system, Global search (Cmd+K)
+- [x] Cover images, Responsive sidebar, Custom typography
 
-### Phase 2 (April 19, 2026)
+### Phase 2 - Theme + Export
 - [x] Dark/light theme switcher with localStorage persistence
 - [x] PDF export via html2pdf.js
 
-### Phase 3 (April 19, 2026)
+### Phase 3 - Nested Folders
 - [x] Nested sub-folders with unlimited depth
-- [x] Recursive folder tree rendering in sidebar
-- [x] "New sub-folder" option in folder context menu
-- [x] Recursive item count on parent folders
-- [x] Recursive delete (deleting parent removes all descendants)
-- [x] Fixed folder collapse/expand toggle bug
+- [x] Recursive tree rendering, cascade delete
+
+### Phase 4 - Sub-pages + UX (April 19, 2026)
+- [x] Sub-pages: notes can have child notes (parentNoteId)
+- [x] Sub-pages shown nested in sidebar with expand/collapse toggle
+- [x] Sub-pages listed in editor below content with navigation links
+- [x] "Add sub-page" from ellipsis menu, sidebar context menu, and inline button
+- [x] Recursive delete: deleting parent deletes all child notes
+- [x] Export PDF moved to ellipsis dropdown at top-right of page
+- [x] Fixed note toggle first-click bug (separate toggleNote handler)
 
 ## Prioritized Backlog
 ### P1 (Next)
 - Drag & drop to reorder notes/move between folders
-- Markdown shortcuts (# for heading, - for list, etc.)
+- Markdown shortcuts (# for heading, - for list)
 - Note duplication
-- Export as .md file
+- Breadcrumb navigation for sub-pages
 
 ### P2 (Later)
-- Import from Markdown
+- Export as .md file, Import from Markdown
 - Recently deleted / trash
 - Note favorites / pinning
-- Keyboard shortcuts cheat sheet

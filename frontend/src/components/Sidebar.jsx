@@ -34,6 +34,10 @@ export default function Sidebar({
     setExpanded((p) => ({ ...p, [id]: p[id] === false }));
   }, []);
 
+  const toggleNote = useCallback((id) => {
+    setExpanded((p) => ({ ...p, [id]: p[id] !== true }));
+  }, []);
+
   const startRename = useCallback((f) => {
     setRenamingId(f.id);
     setRenameVal(f.name);
@@ -96,7 +100,7 @@ export default function Sidebar({
           {hasChildren ? (
             <button
               data-testid={`note-toggle-${note.id}`}
-              onClick={(e) => { e.stopPropagation(); toggle(`note_${note.id}`); }}
+              onClick={(e) => { e.stopPropagation(); toggleNote(`note_${note.id}`); }}
               className="p-0.5 ml-0.5 text-[var(--n-text-secondary)] hover:bg-[var(--n-hover)] rounded transition-colors"
             >
               {isOpen
