@@ -11,7 +11,7 @@ import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough,
   Heading1, Heading2, Heading3, List, ListOrdered, ListChecks,
   Quote, Code, Highlighter, Minus, Download, Loader2,
-  MoreHorizontal, FilePlus, FileText, ChevronRight,
+  MoreHorizontal, FilePlus, FileText, ChevronRight, Home,
 } from 'lucide-react';
 import CoverPicker from './CoverPicker';
 import TagSelector, { TagBadge } from './TagSelector';
@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export default function NoteEditor({
-  note, allTags, allNotes, onUpdateNote, onCreateTag,
+  note, allTags, allNotes, allFolders, onUpdateNote, onCreateTag,
   onCreateSubPage, onSelectNote,
 }) {
   const titleRef = useRef(null);
@@ -154,6 +154,58 @@ export default function NoteEditor({
   const selectedTags = allTags.filter((t) => (note.tags || []).includes(t.id));
   const subPages = (allNotes || []).filter((n) => n.parentNoteId === note.id);
 
+  // Build breadcrumb chain: [folder?] → ancestor notes → current
+  const breadcrumbs = [];
+  if (note.parentNoteId) {
+    // Walk up the parent chain
+    const ancestors = [];
+    let currentId = note.parentNoteId;
+    const visited = new Set();
+    while (currentId && !visited.has(currentId)) {
+      visited.add(currentId);
+      const parent = (allNotes || []).find((n) => n.id === currentId);
+      if (parent) {
+        ancestors.unshift({ id: parent.id, title: parent.title || 'Untitled', type: 'note' });
+        currentId = parent.parentNoteId;
+      } else break;
+    }
+    // Add folder if the root ancestor has one
+    const rootNote = ancestors[0] || note;
+    if (rootNote && rootNote.type !== 'folder') {
+      const actualRoot = (allNotes || []).find((n) => n.id === (ancestors[0]?.id)) || note;
+      if (actualRoot.folderId && allFolders) {
+        const folder = allFolders.find((f) => f.id === actualRoot.folderId);
+        if (folder) {
+          // Walk folder parents too
+          const folderChain = [];
+          let fId = folder.id;
+          const fVisited = new Set();
+          while (fId && !fVisited.has(fId)) {
+            fVisited.add(fId);
+            const f = allFolders.find((fl) => fl.id === fId);
+            if (f) { folderChain.unshift({ id: f.id, title: f.name, type: 'folder' }); fId = f.parentId; }
+            else break;
+          }
+          breadcrumbs.push(...folderChain);
+        }
+      }
+    }
+    breadcrumbs.push(...ancestors);
+  } else if (note.folderId && allFolders) {
+    // No parent note but in a folder - show folder chain
+    const folderChain = [];
+    let fId = note.folderId;
+    const fVisited = new Set();
+    while (fId && !fVisited.has(fId)) {
+      fVisited.add(fId);
+      const f = allFolders.find((fl) => fl.id === fId);
+      if (f) { folderChain.unshift({ id: f.id, title: f.name, type: 'folder' }); fId = f.parentId; }
+      else break;
+    }
+    breadcrumbs.push(...folderChain);
+  }
+  const showBreadcrumbs = breadcrumbs.length > 0;
+
   return (
     <div data-testid="note-editor" className="flex-1 h-full overflow-y-auto bg-[var(--n-bg)] relative">
       {/* Ellipsis menu - top right */}
@@ -199,6 +251,37 @@ export default function NoteEditor({
       />
 
       <div className={`w-full max-w-4xl mx-auto px-8 md:px-24 ${note.coverImage ? 'pt-8' : 'pt-12'} pb-24 flex flex-col`}>
+        {/* Breadcrumb navigation */}
+        {showBreadcrumbs && (
+          <nav data-testid="breadcrumb-nav" className="flex items-center gap-1 mb-3 flex-wrap">
+            {breadcrumbs.map((crumb, i) => (
+              <span key={crumb.id} className="flex items-center gap-1">
+                {i > 0 && <ChevronRight className="w-3 h-3 text-[var(--n-placeholder)]" strokeWidth={1.5} />}
+                {crumb.type === 'note' ? (
+                  <button
+                    data-testid={`breadcrumb-${crumb.id}`}
+                    onClick={() => onSelectNote(crumb.id)}
+                    className="text-xs text-[var(--n-text-secondary)] hover:text-[var(--n-text)] hover:bg-[var(--n-hover)] rounded px-1.5 py-0.5 transition-colors truncate max-w-[160px]"
+                  >
+                    {crumb.title}
+                  </button>
+                ) : (
+                  <span
+                    data-testid={`breadcrumb-folder-${crumb.id}`}
+                    className="text-xs text-[var(--n-text-secondary)] px-1.5 py-0.5 truncate max-w-[160px]"
+                  >
+                    {crumb.title}
+                  </span>
+                )}
+              </span>
+            ))}
+            <ChevronRight className="w-3 h-3 text-[var(--n-placeholder)]" strokeWidth={1.5} />
+            <span className="text-xs text-[var(--n-text)] font-medium px-1.5 py-0.5 truncate max-w-[200px]">
+              {note.title || 'Untitled'}
+            </span>
+          </nav>
+        )}
+
         {/* Tag selector row */}
         <div className="flex items-center gap-1 mb-4 opacity-30 hover:opacity-100 focus-within:opacity-100 transition-opacity">
           <TagSelector

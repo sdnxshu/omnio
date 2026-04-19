@@ -179,6 +179,7 @@ function App() {
             note={selectedNote}
             allTags={tags}
             allNotes={notes}
+            allFolders={folders}
             onUpdateNote={handleUpdateNote}
             onCreateTag={handleCreateTag}
             onCreateSubPage={(parentId) => handleCreateNote(selectedNote.folderId, parentId)}
