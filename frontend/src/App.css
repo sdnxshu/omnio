@@ -1,34 +1,212 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* Tiptap Editor Styles */
+.tiptap {
+  outline: none;
+  font-family: 'Figtree', sans-serif;
+  color: #37352F;
+  line-height: 1.7;
+  font-size: 1rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+.tiptap > * + * {
+  margin-top: 0.5em;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+/* Headings */
+.tiptap h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1F1F1F;
+  line-height: 1.2;
+  margin-top: 1.5em;
+  margin-bottom: 0.3em;
 }
 
-.App-link {
-    color: #61dafb;
+.tiptap h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #1F1F1F;
+  line-height: 1.3;
+  margin-top: 1.2em;
+  margin-bottom: 0.2em;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.tiptap h3 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.25em;
+  font-weight: 500;
+  color: #1F1F1F;
+  line-height: 1.4;
+  margin-top: 1em;
+  margin-bottom: 0.2em;
+}
+
+/* Paragraph */
+.tiptap p {
+  margin-bottom: 0.1em;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #C4C4C0;
+  pointer-events: none;
+  height: 0;
+  font-style: normal;
+}
+
+/* Bold, Italic, etc */
+.tiptap strong {
+  font-weight: 600;
+}
+
+.tiptap em {
+  font-style: italic;
+}
+
+.tiptap s {
+  text-decoration: line-through;
+  color: #787774;
+}
+
+.tiptap u {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Code inline */
+.tiptap code {
+  background-color: #F7F6F3;
+  border-radius: 4px;
+  padding: 2px 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875em;
+  color: #EB5757;
+}
+
+/* Code block */
+.tiptap pre {
+  background: #F7F6F3;
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 0.5em 0;
+  overflow-x: auto;
+}
+
+.tiptap pre code {
+  background: none;
+  padding: 0;
+  color: #37352F;
+  font-size: 0.85em;
+  line-height: 1.6;
+}
+
+/* Blockquote */
+.tiptap blockquote {
+  border-left: 3px solid #1F1F1F;
+  padding-left: 1rem;
+  margin: 0.5em 0;
+  color: #37352F;
+}
+
+/* Lists */
+.tiptap ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.tiptap ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+}
+
+.tiptap li {
+  margin: 0.15em 0;
+}
+
+.tiptap li p {
+  margin: 0;
+}
+
+/* Task list */
+.tiptap ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.tiptap ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.15em 0;
+}
+
+.tiptap ul[data-type="taskList"] li > label {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.tiptap ul[data-type="taskList"] li > label input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #D3D1CB;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.tiptap ul[data-type="taskList"] li > label input[type="checkbox"]:checked {
+  background-color: #2EAADC;
+  border-color: #2EAADC;
+}
+
+.tiptap ul[data-type="taskList"] li > label input[type="checkbox"]:checked::after {
+  content: '✓';
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tiptap ul[data-type="taskList"] li[data-checked="true"] > div > p {
+  text-decoration: line-through;
+  color: #787774;
+}
+
+/* Highlight */
+.tiptap mark {
+  background-color: #FDECC8;
+  border-radius: 2px;
+  padding: 1px 2px;
+}
+
+/* Horizontal rule */
+.tiptap hr {
+  border: none;
+  border-top: 1px solid #EBEBEA;
+  margin: 1.5em 0;
+}
+
+/* Selection */
+.tiptap ::selection {
+  background-color: #D3E5EF;
+}
+
+/* Link placeholder */
+.tiptap a {
+  color: #37352F;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.tiptap a:hover {
+  color: #2EAADC;
 }
