@@ -60,11 +60,35 @@ export function getFolders() {
   return getAll(KEYS.folders);
 }
 
-export function createFolder(name = 'New Folder') {
+export function getRootFolders() {
+  return getFolders().filter((f) => !f.parentId);
+}
+
+export function getChildFolders(parentId) {
+  return getFolders().filter((f) => f.parentId === parentId);
+}
+
+function getAllDescendantFolderIds(folderId) {
+  const folders = getFolders();
+  const ids = [];
+  function collect(parentId) {
+    folders.forEach((f) => {
+      if (f.parentId === parentId) {
+        ids.push(f.id);
+        collect(f.id);
+      }
+    });
+  }
+  collect(folderId);
+  return ids;
+}
+
+export function createFolder(name = 'New Folder', parentId = null) {
   const folders = getFolders();
   const folder = {
     id: uuidv4(),
     name,
+    parentId,
     createdAt: new Date().toISOString(),
   };
   folders.push(folder);
@@ -82,11 +106,13 @@ export function updateFolder(id, updates) {
 }
 
 export function deleteFolder(id) {
-  const folders = getFolders().filter((f) => f.id !== id);
+  const descendantIds = getAllDescendantFolderIds(id);
+  const allIdsToDelete = [id, ...descendantIds];
+  const folders = getFolders().filter((f) => !allIdsToDelete.includes(f.id));
   saveAll(KEYS.folders, folders);
-  // Move notes from this folder to unorganized
+  // Move notes from deleted folders to unorganized
   const notes = getNotes().map((n) =>
-    n.folderId === id ? { ...n, folderId: null } : n
+    allIdsToDelete.includes(n.folderId) ? { ...n, folderId: null } : n
   );
   saveAll(KEYS.notes, notes);
 }

@@ -98,8 +98,8 @@ function App() {
     }
   }, []);
 
-  const handleCreateFolder = useCallback(() => {
-    createFolder('New Folder');
+  const handleCreateFolder = useCallback((parentId = null) => {
+    createFolder('New Folder', parentId);
     refresh();
   }, [refresh]);
 
