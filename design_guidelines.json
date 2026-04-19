@@ -1,0 +1,93 @@
+{
+  "project_name": "Notion-like Markdown Note-Taking SaaS",
+  "theme": "Light",
+  "archetype": "4 (Swiss & High-Contrast / Soft Utility Variant)",
+  "emotional_tone": "Calm, organized, clear, frictionless",
+  "typography": {
+    "headings": "Outfit",
+    "body": "Figtree",
+    "code": "JetBrains Mono",
+    "rules": {
+      "h1": "text-4xl sm:text-5xl tracking-tight font-bold text-[#1F1F1F] leading-tight",
+      "h2": "text-2xl sm:text-3xl tracking-tight font-semibold text-[#1F1F1F]",
+      "h3": "text-xl sm:text-2xl font-medium text-[#1F1F1F]",
+      "body": "text-base leading-relaxed text-[#37352F]",
+      "metadata": "text-sm text-[#787774]"
+    }
+  },
+  "colors": {
+    "surface": {
+      "primary": "#FFFFFF",
+      "sidebar": "#F7F7F5",
+      "hover": "#EFEFEF",
+      "active": "#EAEAEA",
+      "border": "#EBEBEA",
+      "overlay": "bg-black/20"
+    },
+    "text": {
+      "primary": "#37352F",
+      "secondary": "#787774",
+      "inverse": "#FFFFFF",
+      "accent": "#000000"
+    },
+    "tags": {
+      "red": "bg-[#FFE2DD] text-[#93271C]",
+      "blue": "bg-[#D3E5EF] text-[#183347]",
+      "green": "bg-[#DBEDDB] text-[#1C3829]",
+      "yellow": "bg-[#FDECC8] text-[#402C1B]",
+      "purple": "bg-[#E8DEEE] text-[#412454]",
+      "gray": "bg-[#E3E2E0] text-[#32302C]"
+    }
+  },
+  "layout_and_spacing": {
+    "app_container": "h-screen w-full flex overflow-hidden bg-white text-[#37352F] font-sans",
+    "sidebar": "w-64 md:w-72 flex-shrink-0 border-r border-[#EBEBEA] bg-[#F7F7F5] flex flex-col transition-all duration-300 h-full",
+    "main_content": "flex-1 h-full overflow-y-auto bg-white flex justify-center relative",
+    "editor_container": "w-full max-w-4xl px-8 py-12 md:px-24 md:py-24 flex flex-col",
+    "page_header": "mb-8 flex flex-col gap-4 relative group",
+    "cover_image": "h-48 md:h-64 w-full object-cover relative group border-b border-[#EBEBEA]"
+  },
+  "components": {
+    "buttons": "rounded-md px-3 py-1.5 text-sm font-medium transition-colors hover:bg-[#EFEFEF] flex items-center gap-2",
+    "sidebar_item": "flex items-center gap-2 px-3 py-1 rounded-md hover:bg-[#EBEBEA] text-sm text-[#37352F] cursor-pointer group transition-colors",
+    "sidebar_item_active": "bg-[#EBEBEA] font-medium",
+    "search_cmd_k": "Use Shadcn Command component. Clean white background, shadow-lg, 1px border border-[#EBEBEA], rounded-xl. Text should be #37352F.",
+    "dropdowns": "Use Shadcn Dropdown Menu. rounded-lg, shadow-md border-[#EBEBEA] bg-white.",
+    "inputs": "bg-transparent border-0 focus:ring-0 focus:outline-none placeholder-[#787774]"
+  },
+  "motion_and_interactions": {
+    "hover_state": "Subtle background color shifts (transparent to #EFEFEF). Keep it instantaneous or 150ms max to feel snappy.",
+    "sidebar_toggle": "Smooth transform/width transition (-translate-x-full on mobile).",
+    "focus_state": "focus-visible:ring-2 focus-visible:ring-[#EBEBEA] focus-visible:outline-none rounded-sm"
+  },
+  "assets": {
+    "icons": "Use lucide-react. Stroke-width: 1.5, size: 18 for sidebar items, size: 20 for headers.",
+    "images": {
+      "default_covers": [
+        {
+          "url": "https://images.unsplash.com/photo-1602128110234-2d11c0aaadfe?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzB8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwYXJjaGl0ZWN0dXJlfGVufDB8fHx8MTc3NjYwOTEyM3ww&ixlib=rb-4.1.0&q=85",
+          "description": "minimalist architecture green trees white concrete"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1760442903458-664c65a88b8a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTB8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMHNvZnQlMjBncmFkaWVudHxlbnwwfHx8fDE3NzY2MDkxMjN8MA&ixlib=rb-4.1.0&q=85",
+          "description": "abstract soft gradient blue purple"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1615134732800-ca7ef7a3388c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwxfHxjYWxtJTIwbmF0dXJlJTIwbGFuZHNjYXBlfGVufDB8fHx8MTc3NjYwOTEyM3ww&ixlib=rb-4.1.0&q=85",
+          "description": "calm nature landscape grass field lake"
+        }
+      ]
+    }
+  },
+  "instructions_to_main_agent": [
+    "TECH STACK: React, Tailwind CSS, Shadcn UI, lucide-react.",
+    "EDITOR: Integrate a robust Notion-like WYSIWYG editor. Highly recommend `@blocknote/react`, `novel`, or standard `tiptap` with markdown support. It must support inline rendering and slash commands if possible.",
+    "DATA LAYER: This app has NO BACKEND. Use the browser's `localStorage` to persist Workspaces, Folders, Notes, and Tags. Ensure state updates synchronously.",
+    "LAYOUT: Build a 100vh app wrapper. Sidebar fixed on left (collapsible via hamburger on mobile). Main editor area takes remaining space. Limit the editor max-width to 4xl (896px) and center it for optimal reading, just like Notion.",
+    "UI FEEL: Keep it strictly 'Notion style'. Very minimal, stark white (#FFFFFF) editor surface, and off-white/gray (#F7F7F5) sidebar. Do NOT use dark heavy shadows. Use soft, almost invisible borders.",
+    "FEATURES: Sidebar must show nested folders or flat workspaces with notes under them. Implement Cmd+K (using Shadcn Command Dialog) for global search across all notes. Implement a Tag system with soft pastel colors (refer to tags palette).",
+    "PAGE ASSETS: Allow users to add a Cover Image to notes. Use the URLs from `default_covers` in this JSON as pre-defined choices or randomized default assignments.",
+    "TYPOGRAPHY: Import and use `Outfit` for headings and `Figtree` for body text. Headings must be tight (`tracking-tight`).",
+    "TESTING: MUST include `data-testid` on all interactive elements (buttons, sidebar items, note titles, editor area) for testing purposes."
+  ]
+}
