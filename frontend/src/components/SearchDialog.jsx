@@ -8,6 +8,7 @@ import {
   CommandGroup,
   CommandItem,
 } from '@/components/ui/command';
+import { DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { searchNotes, getFolders, getTags } from '@/lib/storage';
 
 export default function SearchDialog({ open, onOpenChange, onSelectNote }) {
@@ -60,6 +61,8 @@ export default function SearchDialog({ open, onOpenChange, onSelectNote }) {
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
+      <DialogTitle className="sr-only">Search notes</DialogTitle>
+      <DialogDescription className="sr-only">Search across all your notes by title or content</DialogDescription>
       <CommandInput
         data-testid="search-input"
         placeholder="Search notes..."

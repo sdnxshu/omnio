@@ -2,7 +2,6 @@ import { useEffect, useCallback, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
-import Underline from '@tiptap/extension-underline';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Highlight from '@tiptap/extension-highlight';
@@ -54,7 +53,6 @@ export default function NoteEditor({
       Placeholder.configure({
         placeholder: "Start writing, or press '/' for commands...",
       }),
-      Underline,
       TaskList,
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
@@ -202,7 +200,7 @@ export default function NoteEditor({
 
       <div className={`w-full max-w-4xl mx-auto px-8 md:px-24 ${note.coverImage ? 'pt-8' : 'pt-20'} pb-24 flex flex-col`}>
         {/* Toolbar row */}
-        <div className="flex items-center gap-1 mb-4 opacity-0 hover:opacity-100 focus-within:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 mb-4 opacity-30 hover:opacity-100 focus-within:opacity-100 transition-opacity">
           <TagSelector
             allTags={allTags}
             selectedTagIds={note.tags || []}
