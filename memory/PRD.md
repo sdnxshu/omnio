@@ -10,51 +10,39 @@ Build a markdown-based note-taking application like Notion. Fully responsive, sl
 - **PDF Export**: html2pdf.js
 - **Theme**: CSS custom properties (--n-*) with .dark class on <html>
 
-## User Personas
-- Individual note-takers wanting a local, fast, Notion-like experience
-- Students and professionals who need organized notes with folders and tags
-
-## Core Requirements (Static)
-- Notion-style WYSIWYG markdown editor
-- Folder/workspace organization
-- Tag/label system with colored pastel tags
-- Global search (Cmd+K)
-- Cover images for notes
-- Responsive design with collapsible sidebar
-- Dark/light theme switcher
-- PDF export
-
-## What's Been Implemented (April 19, 2026)
-- [x] Full Notion-style WYSIWYG editor (tiptap) with formatting toolbar
+## What's Been Implemented
+### Phase 1 (April 19, 2026)
+- [x] Notion-style WYSIWYG tiptap editor with formatting toolbar
 - [x] Sidebar with folder navigation, note list, search trigger
 - [x] Folder CRUD (create, rename, delete)
 - [x] Note CRUD (create, edit, delete)
-- [x] Tag system with 6 colored options (red, blue, green, yellow, purple, gray)
-- [x] Global search via Cmd+K (shadcn Command dialog)
-- [x] Cover images (3 photos + 6 color covers)
+- [x] Tag system with 6 colored options
+- [x] Global search via Cmd+K
+- [x] Cover images (3 photos + 6 colors)
+- [x] Responsive sidebar (collapsible on mobile)
+- [x] Typography: Outfit/Figtree/JetBrains Mono
+
+### Phase 2 (April 19, 2026)
 - [x] Dark/light theme switcher with localStorage persistence
 - [x] PDF export via html2pdf.js
-- [x] Responsive sidebar (collapsible on mobile)
-- [x] Typography: Outfit (headings), Figtree (body), JetBrains Mono (code)
-- [x] All interactive elements have data-testid attributes
 
-## Testing Results
-- 17/17 frontend flows passing (100% success rate)
-- No critical bugs
+### Phase 3 (April 19, 2026)
+- [x] Nested sub-folders with unlimited depth
+- [x] Recursive folder tree rendering in sidebar
+- [x] "New sub-folder" option in folder context menu
+- [x] Recursive item count on parent folders
+- [x] Recursive delete (deleting parent removes all descendants)
+- [x] Fixed folder collapse/expand toggle bug
 
 ## Prioritized Backlog
-### P0 (Done)
-- All core features implemented
-
 ### P1 (Next)
-- Drag & drop to reorder notes and move between folders
-- Nested folders (sub-folders)
-- Markdown shortcuts (type # for heading, - for list, etc.)
+- Drag & drop to reorder notes/move between folders
+- Markdown shortcuts (# for heading, - for list, etc.)
 - Note duplication
+- Export as .md file
 
 ### P2 (Later)
-- Export as Markdown (.md) file
 - Import from Markdown
-- Keyboard shortcuts cheat sheet
 - Recently deleted / trash
 - Note favorites / pinning
+- Keyboard shortcuts cheat sheet

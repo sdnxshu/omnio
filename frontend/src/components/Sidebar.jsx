@@ -31,7 +31,7 @@ export default function Sidebar({
   }, [renamingId]);
 
   const toggle = useCallback((id) => {
-    setExpanded((p) => ({ ...p, [id]: !p[id] }));
+    setExpanded((p) => ({ ...p, [id]: p[id] === false }));
   }, []);
 
   const startRename = useCallback((f) => {
