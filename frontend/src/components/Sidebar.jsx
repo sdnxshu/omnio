@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Search, Plus, FileText, Folder, FolderOpen,
   ChevronRight, MoreHorizontal, Trash2, Pencil,
-  PanelLeftClose, FolderPlus, ChevronDown, Sun, Moon,
+  PanelLeftClose, FolderPlus, ChevronDown, Sun, Moon, FilePlus,
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -46,7 +46,7 @@ export default function Sidebar({
   }, [renamingId, renameVal, onRenameFolder]);
 
   const rootFolders = folders.filter((f) => !f.parentId);
-  const unorganizedNotes = notes.filter((n) => !n.folderId);
+  const unorganizedNotes = notes.filter((n) => !n.folderId && !n.parentNoteId);
 
   const getNoteTags = (note) =>
     (note.tags || []).map((id) => tags.find((t) => t.id === id)).filter(Boolean);
@@ -54,24 +54,104 @@ export default function Sidebar({
   // Build lookup maps once
   const childFolderMap = {};
   const folderNoteMap = {};
+  const childNoteMap = {};
   folders.forEach((f) => {
     const pid = f.parentId || '__root__';
     if (!childFolderMap[pid]) childFolderMap[pid] = [];
     childFolderMap[pid].push(f);
   });
   notes.forEach((n) => {
-    const fid = n.folderId || '__none__';
-    if (!folderNoteMap[fid]) folderNoteMap[fid] = [];
-    folderNoteMap[fid].push(n);
+    if (n.parentNoteId) {
+      if (!childNoteMap[n.parentNoteId]) childNoteMap[n.parentNoteId] = [];
+      childNoteMap[n.parentNoteId].push(n);
+    } else {
+      const fid = n.folderId || '__none__';
+      if (!folderNoteMap[fid]) folderNoteMap[fid] = [];
+      folderNoteMap[fid].push(n);
+    }
   });
 
   const getChildren = (id) => childFolderMap[id] || [];
   const getFolderNotes = (id) => folderNoteMap[id] || [];
+  const getSubPages = (noteId) => childNoteMap[noteId] || [];
 
   const countItems = (id) => {
     let c = (folderNoteMap[id] || []).length;
     (childFolderMap[id] || []).forEach((f) => { c += countItems(f.id); });
     return c;
+  };
+
+  const renderNoteItem = (note) => {
+    const children = getSubPages(note.id);
+    const hasChildren = children.length > 0;
+    const isOpen = expanded[`note_${note.id}`] === true;
+    const isSelected = note.id === selectedNoteId;
+    const noteTags = getNoteTags(note);
+
+    return (
+      <div key={note.id} data-testid={`note-item-${note.id}`}>
+        <div className={`flex items-center group rounded-md cursor-pointer transition-colors ${
+          isSelected ? 'bg-[var(--n-active)]' : 'hover:bg-[var(--n-hover)]'
+        }`}>
+          {hasChildren ? (
+            <button
+              data-testid={`note-toggle-${note.id}`}
+              onClick={(e) => { e.stopPropagation(); toggle(`note_${note.id}`); }}
+              className="p-0.5 ml-0.5 text-[var(--n-text-secondary)] hover:bg-[var(--n-hover)] rounded transition-colors"
+            >
+              {isOpen
+                ? <ChevronDown className="w-3 h-3" strokeWidth={1.5} />
+                : <ChevronRight className="w-3 h-3" strokeWidth={1.5} />}
+            </button>
+          ) : (
+            <span className="w-4 ml-0.5" />
+          )}
+          <div
+            className="flex-1 flex items-center gap-2 px-1.5 py-1.5 min-w-0"
+            onClick={() => onSelectNote(note.id)}
+          >
+            <FileText className="w-4 h-4 text-[var(--n-text-secondary)] flex-shrink-0" strokeWidth={1.5} />
+            <div className="flex-1 min-w-0">
+              <p className={`text-sm truncate ${isSelected ? 'font-medium text-[var(--n-text-title)]' : 'text-[var(--n-text)]'}`}>
+                {note.title || 'Untitled'}
+              </p>
+              {noteTags.length > 0 && (
+                <div className="flex gap-1 mt-0.5 overflow-hidden">
+                  {noteTags.slice(0, 2).map((tag) => (<TagBadge key={tag.id} tag={tag} small />))}
+                  {noteTags.length > 2 && (<span className="text-[9px] text-[var(--n-text-secondary)]">+{noteTags.length - 2}</span>)}
+                </div>
+              )}
+            </div>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button data-testid={`note-menu-${note.id}`}
+                className="p-1 mr-1 rounded-md text-[var(--n-text-secondary)] opacity-0 group-hover:opacity-100 hover:bg-[var(--n-hover)] transition-all"
+                onClick={(e) => e.stopPropagation()}>
+                <MoreHorizontal className="w-3.5 h-3.5" strokeWidth={1.5} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-48 bg-[var(--n-bg)] border-[var(--n-border)] rounded-lg shadow-md" align="start">
+              <DropdownMenuItem data-testid={`note-add-subpage-${note.id}`}
+                onClick={() => onCreateNote(note.folderId, note.id)}
+                className="gap-2 text-[var(--n-text)] cursor-pointer">
+                <FilePlus className="w-4 h-4" strokeWidth={1.5} /> Add sub-page
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-[var(--n-border)]" />
+              <DropdownMenuItem data-testid={`note-delete-${note.id}`} onClick={() => onDeleteNote(note.id)}
+                className="gap-2 text-red-600 cursor-pointer focus:text-red-600">
+                <Trash2 className="w-4 h-4" strokeWidth={1.5} /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        {hasChildren && isOpen && (
+          <div className="ml-4 pl-2 border-l border-[var(--n-border)]">
+            {children.map((child) => renderNoteItem(child))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   const renderFolder = (folder, depth) => {
@@ -148,9 +228,7 @@ export default function Sidebar({
         {isOpen && (
           <div className="ml-4 pl-2 border-l border-[var(--n-border)]">
             {children.map((c) => renderFolder(c, depth + 1))}
-            {fNotes.map((n) => (
-              <NoteItem key={n.id} note={n} isSelected={n.id === selectedNoteId} onSelect={onSelectNote} onDelete={onDeleteNote} tags={getNoteTags(n)} />
-            ))}
+            {fNotes.map((n) => renderNoteItem(n))}
             {children.length === 0 && fNotes.length === 0 && (
               <p className="text-[10px] text-[var(--n-text-secondary)] px-2 py-1.5 italic">No pages inside</p>
             )}
@@ -215,9 +293,7 @@ export default function Sidebar({
               {rootFolders.length > 0 && (
                 <p className="text-[10px] font-medium text-[var(--n-text-secondary)] uppercase tracking-wider px-2 pt-3 pb-1">Pages</p>
               )}
-              {unorganizedNotes.map((n) => (
-                <NoteItem key={n.id} note={n} isSelected={n.id === selectedNoteId} onSelect={onSelectNote} onDelete={onDeleteNote} tags={getNoteTags(n)} />
-              ))}
+              {unorganizedNotes.map((n) => renderNoteItem(n))}
             </div>
           )}
           {notes.length === 0 && folders.length === 0 && (
@@ -232,47 +308,5 @@ export default function Sidebar({
         </div>
       </ScrollArea>
     </aside>
-  );
-}
-
-function NoteItem({ note, isSelected, onSelect, onDelete, tags }) {
-  return (
-    <div
-      data-testid={`note-item-${note.id}`}
-      className={`flex items-center group rounded-md cursor-pointer transition-colors ${
-        isSelected ? 'bg-[var(--n-active)]' : 'hover:bg-[var(--n-hover)]'
-      }`}
-      onClick={() => onSelect(note.id)}
-    >
-      <div className="flex-1 flex items-center gap-2 px-2 py-1.5 min-w-0">
-        <FileText className="w-4 h-4 text-[var(--n-text-secondary)] flex-shrink-0" strokeWidth={1.5} />
-        <div className="flex-1 min-w-0">
-          <p className={`text-sm truncate ${isSelected ? 'font-medium text-[var(--n-text-title)]' : 'text-[var(--n-text)]'}`}>
-            {note.title || 'Untitled'}
-          </p>
-          {tags.length > 0 && (
-            <div className="flex gap-1 mt-0.5 overflow-hidden">
-              {tags.slice(0, 2).map((tag) => (<TagBadge key={tag.id} tag={tag} small />))}
-              {tags.length > 2 && (<span className="text-[9px] text-[var(--n-text-secondary)]">+{tags.length - 2}</span>)}
-            </div>
-          )}
-        </div>
-      </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button data-testid={`note-menu-${note.id}`}
-            className="p-1 mr-1 rounded-md text-[var(--n-text-secondary)] opacity-0 group-hover:opacity-100 hover:bg-[var(--n-hover)] transition-all"
-            onClick={(e) => e.stopPropagation()}>
-            <MoreHorizontal className="w-3.5 h-3.5" strokeWidth={1.5} />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-44 bg-[var(--n-bg)] border-[var(--n-border)] rounded-lg shadow-md" align="start">
-          <DropdownMenuItem data-testid={`note-delete-${note.id}`} onClick={() => onDelete(note.id)}
-            className="gap-2 text-red-600 cursor-pointer focus:text-red-600">
-            <Trash2 className="w-4 h-4" strokeWidth={1.5} /> Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
   );
 }

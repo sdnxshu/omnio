@@ -8,38 +8,25 @@ import Highlight from '@tiptap/extension-highlight';
 import Typography from '@tiptap/extension-typography';
 import html2pdf from 'html2pdf.js';
 import {
-  Bold,
-  Italic,
-  Underline as UnderlineIcon,
-  Strikethrough,
-  Heading1,
-  Heading2,
-  Heading3,
-  List,
-  ListOrdered,
-  ListChecks,
-  Quote,
-  Code,
-  Highlighter,
-  Minus,
-  Download,
-  Loader2,
+  Bold, Italic, Underline as UnderlineIcon, Strikethrough,
+  Heading1, Heading2, Heading3, List, ListOrdered, ListChecks,
+  Quote, Code, Highlighter, Minus, Download, Loader2,
+  MoreHorizontal, FilePlus, FileText, ChevronRight,
 } from 'lucide-react';
 import CoverPicker from './CoverPicker';
 import TagSelector, { TagBadge } from './TagSelector';
 import { Separator } from '@/components/ui/separator';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
+  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function NoteEditor({
-  note,
-  allTags,
-  onUpdateNote,
-  onCreateTag,
+  note, allTags, allNotes, onUpdateNote, onCreateTag,
+  onCreateSubPage, onSelectNote,
 }) {
   const titleRef = useRef(null);
   const isInternalUpdate = useRef(false);
@@ -47,12 +34,8 @@ export default function NoteEditor({
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        heading: { levels: [1, 2, 3] },
-      }),
-      Placeholder.configure({
-        placeholder: "Start writing, or press '/' for commands...",
-      }),
+      StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+      Placeholder.configure({ placeholder: "Start writing, or press '/' for commands..." }),
       TaskList,
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
@@ -127,7 +110,6 @@ export default function NoteEditor({
       container.appendChild(content);
 
       document.body.appendChild(container);
-
       await html2pdf().set({
         margin: [10, 10, 10, 10],
         filename: `${(note.title || 'Untitled').replace(/[^a-zA-Z0-9 ]/g, '')}.pdf`,
@@ -135,7 +117,6 @@ export default function NoteEditor({
         html2canvas: { scale: 2, useCORS: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       }).from(container).save();
-
       document.body.removeChild(container);
     } catch (err) {
       console.error('PDF export failed:', err);
@@ -144,62 +125,81 @@ export default function NoteEditor({
     }
   }, [note, editor]);
 
-  const handleTitleChange = useCallback(
-    (e) => {
-      onUpdateNote(note.id, { title: e.target.value });
-    },
-    [note?.id, onUpdateNote]
-  );
+  const handleTitleChange = useCallback((e) => {
+    onUpdateNote(note.id, { title: e.target.value });
+  }, [note?.id, onUpdateNote]);
 
-  const handleTitleKeyDown = useCallback(
-    (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        editor?.commands.focus('start');
-      }
-    },
-    [editor]
-  );
+  const handleTitleKeyDown = useCallback((e) => {
+    if (e.key === 'Enter') { e.preventDefault(); editor?.commands.focus('start'); }
+  }, [editor]);
 
-  const handleCoverSelect = useCallback(
-    (url) => {
-      onUpdateNote(note.id, { coverImage: url });
-    },
-    [note?.id, onUpdateNote]
-  );
+  const handleCoverSelect = useCallback((url) => {
+    onUpdateNote(note.id, { coverImage: url });
+  }, [note?.id, onUpdateNote]);
 
   const handleCoverRemove = useCallback(() => {
     onUpdateNote(note.id, { coverImage: null });
   }, [note?.id, onUpdateNote]);
 
-  const handleToggleTag = useCallback(
-    (tagId) => {
-      const currentTags = note.tags || [];
-      const newTags = currentTags.includes(tagId)
-        ? currentTags.filter((t) => t !== tagId)
-        : [...currentTags, tagId];
-      onUpdateNote(note.id, { tags: newTags });
-    },
-    [note?.id, note?.tags, onUpdateNote]
-  );
+  const handleToggleTag = useCallback((tagId) => {
+    const currentTags = note.tags || [];
+    const newTags = currentTags.includes(tagId)
+      ? currentTags.filter((t) => t !== tagId)
+      : [...currentTags, tagId];
+    onUpdateNote(note.id, { tags: newTags });
+  }, [note?.id, note?.tags, onUpdateNote]);
 
   if (!note || !editor) return null;
 
   const selectedTags = allTags.filter((t) => (note.tags || []).includes(t.id));
+  const subPages = (allNotes || []).filter((n) => n.parentNoteId === note.id);
 
   return (
-    <div
-      data-testid="note-editor"
-      className="flex-1 h-full overflow-y-auto bg-[var(--n-bg)]"
-    >
+    <div data-testid="note-editor" className="flex-1 h-full overflow-y-auto bg-[var(--n-bg)] relative">
+      {/* Ellipsis menu - top right */}
+      <div className="absolute top-3 right-4 z-10">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              data-testid="note-actions-menu"
+              className="p-1.5 rounded-md text-[var(--n-text-secondary)] hover:bg-[var(--n-hover)] hover:text-[var(--n-text)] transition-colors"
+            >
+              <MoreHorizontal className="w-5 h-5" strokeWidth={1.5} />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-52 bg-[var(--n-bg)] border-[var(--n-border)] rounded-lg shadow-md" align="end">
+            <DropdownMenuItem
+              data-testid="menu-add-subpage"
+              onClick={() => onCreateSubPage(note.id)}
+              className="gap-2 text-[var(--n-text)] cursor-pointer"
+            >
+              <FilePlus className="w-4 h-4" strokeWidth={1.5} />
+              Add sub-page
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-[var(--n-border)]" />
+            <DropdownMenuItem
+              data-testid="menu-export-pdf"
+              onClick={handleExportPDF}
+              disabled={exporting}
+              className="gap-2 text-[var(--n-text)] cursor-pointer"
+            >
+              {exporting
+                ? <Loader2 className="w-4 h-4 animate-spin" strokeWidth={1.5} />
+                : <Download className="w-4 h-4" strokeWidth={1.5} />}
+              {exporting ? 'Exporting...' : 'Export as PDF'}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
       <CoverPicker
         coverImage={note.coverImage}
         onSelect={handleCoverSelect}
         onRemove={handleCoverRemove}
       />
 
-      <div className={`w-full max-w-4xl mx-auto px-8 md:px-24 ${note.coverImage ? 'pt-8' : 'pt-20'} pb-24 flex flex-col`}>
-        {/* Toolbar row */}
+      <div className={`w-full max-w-4xl mx-auto px-8 md:px-24 ${note.coverImage ? 'pt-8' : 'pt-12'} pb-24 flex flex-col`}>
+        {/* Tag selector row */}
         <div className="flex items-center gap-1 mb-4 opacity-30 hover:opacity-100 focus-within:opacity-100 transition-opacity">
           <TagSelector
             allTags={allTags}
@@ -207,30 +207,13 @@ export default function NoteEditor({
             onToggleTag={handleToggleTag}
             onCreateTag={onCreateTag}
           />
-          <button
-            data-testid="export-pdf-btn"
-            onClick={handleExportPDF}
-            disabled={exporting}
-            className="flex items-center gap-1.5 text-xs text-[var(--n-text-secondary)] hover:text-[var(--n-text)] hover:bg-[var(--n-hover)] rounded-md px-2 py-1 transition-colors disabled:opacity-50"
-          >
-            {exporting ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" strokeWidth={1.5} />
-            ) : (
-              <Download className="w-3.5 h-3.5" strokeWidth={1.5} />
-            )}
-            {exporting ? 'Exporting...' : 'Export PDF'}
-          </button>
         </div>
 
         {/* Tags display */}
         {selectedTags.length > 0 && (
           <div data-testid="note-tags" className="flex flex-wrap gap-1.5 mb-4">
             {selectedTags.map((tag) => (
-              <TagBadge
-                key={tag.id}
-                tag={tag}
-                onRemove={(id) => handleToggleTag(id)}
-              />
+              <TagBadge key={tag.id} tag={tag} onRemove={(id) => handleToggleTag(id)} />
             ))}
           </div>
         )}
@@ -248,20 +231,52 @@ export default function NoteEditor({
 
         {/* Metadata */}
         <p className="text-sm text-[var(--n-text-secondary)] mb-6">
-          {new Date(note.updatedAt).toLocaleDateString('en-US', {
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric',
-          })}
+          {new Date(note.updatedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
         </p>
 
         {/* Formatting Toolbar */}
         <EditorToolbar editor={editor} />
-
         <Separator className="mb-6 bg-[var(--n-border)]" />
 
         {/* Editor */}
         <EditorContent editor={editor} />
+
+        {/* Sub-pages section */}
+        {(subPages.length > 0) && (
+          <div data-testid="sub-pages-section" className="mt-10 pt-6 border-t border-[var(--n-border)]">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-medium text-[var(--n-text-secondary)] uppercase tracking-wider">
+                Sub-pages
+              </p>
+            </div>
+            <div className="flex flex-col gap-1">
+              {subPages.map((sp) => (
+                <button
+                  key={sp.id}
+                  data-testid={`subpage-link-${sp.id}`}
+                  onClick={() => onSelectNote(sp.id)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-[var(--n-hover)] transition-colors text-left group"
+                >
+                  <FileText className="w-4 h-4 text-[var(--n-text-secondary)] flex-shrink-0" strokeWidth={1.5} />
+                  <span className="text-sm text-[var(--n-text)] truncate flex-1">
+                    {sp.title || 'Untitled'}
+                  </span>
+                  <ChevronRight className="w-3.5 h-3.5 text-[var(--n-text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity" strokeWidth={1.5} />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Add sub-page inline button */}
+        <button
+          data-testid="add-subpage-inline"
+          onClick={() => onCreateSubPage(note.id)}
+          className="flex items-center gap-2 mt-6 px-3 py-2 rounded-lg text-[var(--n-text-secondary)] hover:bg-[var(--n-hover)] hover:text-[var(--n-text)] transition-colors text-sm opacity-40 hover:opacity-100"
+        >
+          <FilePlus className="w-4 h-4" strokeWidth={1.5} />
+          Add a sub-page
+        </button>
       </div>
     </div>
   );
@@ -290,16 +305,9 @@ function EditorToolbar({ editor }) {
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div
-        data-testid="editor-toolbar"
-        className="flex items-center gap-0.5 mb-4 flex-wrap"
-      >
+      <div data-testid="editor-toolbar" className="flex items-center gap-0.5 mb-4 flex-wrap">
         {tools.map((tool, i) => {
-          if (tool.type === 'sep') {
-            return (
-              <div key={`sep-${i}`} className="w-px h-5 bg-[var(--n-border)] mx-1" />
-            );
-          }
+          if (tool.type === 'sep') return <div key={`sep-${i}`} className="w-px h-5 bg-[var(--n-border)] mx-1" />;
           const Icon = tool.icon;
           return (
             <Tooltip key={i}>
@@ -316,9 +324,7 @@ function EditorToolbar({ editor }) {
                   <Icon className="w-4 h-4" strokeWidth={1.5} />
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
-                {tool.tip}
-              </TooltipContent>
+              <TooltipContent side="bottom" className="text-xs">{tool.tip}</TooltipContent>
             </Tooltip>
           );
         })}

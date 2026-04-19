@@ -57,11 +57,10 @@ function App() {
   }, []);
 
   const handleCreateNote = useCallback(
-    (folderId = null) => {
-      const note = createNote(folderId);
+    (folderId = null, parentNoteId = null) => {
+      const note = createNote(folderId, parentNoteId);
       refresh();
       setSelectedNoteId(note.id);
-      // Close sidebar on mobile after selecting
       if (window.innerWidth < 768) {
         setSidebarOpen(false);
       }
@@ -179,8 +178,11 @@ function App() {
             key={selectedNote.id}
             note={selectedNote}
             allTags={tags}
+            allNotes={notes}
             onUpdateNote={handleUpdateNote}
             onCreateTag={handleCreateTag}
+            onCreateSubPage={(parentId) => handleCreateNote(selectedNote.folderId, parentId)}
+            onSelectNote={handleSelectNote}
           />
         ) : (
           <EmptyState onCreateNote={() => handleCreateNote(null)} />

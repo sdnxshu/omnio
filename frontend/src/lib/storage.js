@@ -24,13 +24,14 @@ export function getNote(id) {
   return getNotes().find((n) => n.id === id) || null;
 }
 
-export function createNote(folderId = null) {
+export function createNote(folderId = null, parentNoteId = null) {
   const notes = getNotes();
   const note = {
     id: uuidv4(),
     title: '',
     content: null,
     folderId,
+    parentNoteId,
     tags: [],
     coverImage: null,
     createdAt: new Date().toISOString(),
@@ -51,8 +52,24 @@ export function updateNote(id, updates) {
 }
 
 export function deleteNote(id) {
-  const notes = getNotes().filter((n) => n.id !== id);
-  saveAll(KEYS.notes, notes);
+  // Recursively collect all descendant note ids
+  const allNotes = getNotes();
+  const idsToDelete = [id];
+  function collectChildren(parentId) {
+    allNotes.forEach((n) => {
+      if (n.parentNoteId === parentId) {
+        idsToDelete.push(n.id);
+        collectChildren(n.id);
+      }
+    });
+  }
+  collectChildren(id);
+  const remaining = allNotes.filter((n) => !idsToDelete.includes(n.id));
+  saveAll(KEYS.notes, remaining);
+}
+
+export function getChildNotes(parentNoteId) {
+  return getNotes().filter((n) => n.parentNoteId === parentNoteId);
 }
 
 // --- Folders ---
