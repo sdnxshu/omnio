@@ -69,8 +69,8 @@ export default function SearchDialog({ open, onOpenChange, onSelectNote }) {
       <CommandList>
         <CommandEmpty data-testid="search-empty">
           <div className="flex flex-col items-center gap-2 py-4">
-            <Search className="w-8 h-8 text-[#787774]" strokeWidth={1.5} />
-            <p className="text-sm text-[#787774]">
+            <Search className="w-8 h-8 text-[var(--n-text-secondary)]" strokeWidth={1.5} />
+            <p className="text-sm text-[var(--n-text-secondary)]">
               {query ? 'No notes found' : 'Type to search your notes'}
             </p>
           </div>
@@ -91,27 +91,27 @@ export default function SearchDialog({ open, onOpenChange, onSelectNote }) {
                   }}
                   className="flex items-center gap-3 px-3 py-2.5 cursor-pointer"
                 >
-                  <FileText className="w-4 h-4 text-[#787774] flex-shrink-0" strokeWidth={1.5} />
+                  <FileText className="w-4 h-4 text-[var(--n-text-secondary)] flex-shrink-0" strokeWidth={1.5} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[#37352F] truncate">
+                    <p className="text-sm font-medium text-[var(--n-text)] truncate">
                       {note.title || 'Untitled'}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
                       {folderName && (
-                        <span className="flex items-center gap-1 text-[10px] text-[#787774]">
+                        <span className="flex items-center gap-1 text-[10px] text-[var(--n-text-secondary)]">
                           <Folder className="w-3 h-3" strokeWidth={1.5} />
                           {folderName}
                         </span>
                       )}
                       {noteTagNames.length > 0 && (
-                        <span className="flex items-center gap-1 text-[10px] text-[#787774]">
+                        <span className="flex items-center gap-1 text-[10px] text-[var(--n-text-secondary)]">
                           <Tag className="w-3 h-3" strokeWidth={1.5} />
                           {noteTagNames.join(', ')}
                         </span>
                       )}
                     </div>
                   </div>
-                  <span className="text-[10px] text-[#787774] flex-shrink-0">
+                  <span className="text-[10px] text-[var(--n-text-secondary)] flex-shrink-0">
                     {new Date(note.updatedAt).toLocaleDateString()}
                   </span>
                 </CommandItem>

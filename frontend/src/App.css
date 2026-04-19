@@ -2,7 +2,7 @@
 .tiptap {
   outline: none;
   font-family: 'Figtree', sans-serif;
-  color: #37352F;
+  color: var(--n-text);
   line-height: 1.7;
   font-size: 1rem;
 }
@@ -17,7 +17,7 @@
   font-size: 2em;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: #1F1F1F;
+  color: var(--n-text-title);
   line-height: 1.2;
   margin-top: 1.5em;
   margin-bottom: 0.3em;
@@ -28,7 +28,7 @@
   font-size: 1.5em;
   font-weight: 600;
   letter-spacing: -0.01em;
-  color: #1F1F1F;
+  color: var(--n-text-title);
   line-height: 1.3;
   margin-top: 1.2em;
   margin-bottom: 0.2em;
@@ -38,7 +38,7 @@
   font-family: 'Outfit', sans-serif;
   font-size: 1.25em;
   font-weight: 500;
-  color: #1F1F1F;
+  color: var(--n-text-title);
   line-height: 1.4;
   margin-top: 1em;
   margin-bottom: 0.2em;
@@ -52,7 +52,7 @@
 .tiptap p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
-  color: #C4C4C0;
+  color: var(--n-placeholder);
   pointer-events: none;
   height: 0;
   font-style: normal;
@@ -69,7 +69,7 @@
 
 .tiptap s {
   text-decoration: line-through;
-  color: #787774;
+  color: var(--n-text-secondary);
 }
 
 .tiptap u {
@@ -79,17 +79,17 @@
 
 /* Code inline */
 .tiptap code {
-  background-color: #F7F6F3;
+  background-color: var(--n-code-bg);
   border-radius: 4px;
   padding: 2px 5px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.875em;
-  color: #EB5757;
+  color: var(--n-code-text);
 }
 
 /* Code block */
 .tiptap pre {
-  background: #F7F6F3;
+  background: var(--n-code-bg);
   border-radius: 6px;
   padding: 1rem;
   margin: 0.5em 0;
@@ -99,17 +99,17 @@
 .tiptap pre code {
   background: none;
   padding: 0;
-  color: #37352F;
+  color: var(--n-text);
   font-size: 0.85em;
   line-height: 1.6;
 }
 
 /* Blockquote */
 .tiptap blockquote {
-  border-left: 3px solid #1F1F1F;
+  border-left: 3px solid var(--n-text-title);
   padding-left: 1rem;
   margin: 0.5em 0;
-  color: #37352F;
+  color: var(--n-text);
 }
 
 /* Lists */
@@ -154,22 +154,23 @@
   -webkit-appearance: none;
   width: 16px;
   height: 16px;
-  border: 2px solid #D3D1CB;
+  border: 2px solid var(--n-placeholder);
   border-radius: 3px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.15s;
+  background: transparent;
 }
 
 .tiptap ul[data-type="taskList"] li > label input[type="checkbox"]:checked {
-  background-color: #2EAADC;
-  border-color: #2EAADC;
+  background-color: var(--n-checkbox);
+  border-color: var(--n-checkbox);
 }
 
 .tiptap ul[data-type="taskList"] li > label input[type="checkbox"]:checked::after {
-  content: '✓';
+  content: '\2713';
   color: white;
   font-size: 11px;
   font-weight: 600;
@@ -177,12 +178,12 @@
 
 .tiptap ul[data-type="taskList"] li[data-checked="true"] > div > p {
   text-decoration: line-through;
-  color: #787774;
+  color: var(--n-text-secondary);
 }
 
 /* Highlight */
 .tiptap mark {
-  background-color: #FDECC8;
+  background-color: var(--n-highlight);
   border-radius: 2px;
   padding: 1px 2px;
 }
@@ -190,7 +191,7 @@
 /* Horizontal rule */
 .tiptap hr {
   border: none;
-  border-top: 1px solid #EBEBEA;
+  border-top: 1px solid var(--n-border);
   margin: 1.5em 0;
 }
 
@@ -199,14 +200,53 @@
   background-color: #D3E5EF;
 }
 
-/* Link placeholder */
+.dark .tiptap ::selection {
+  background-color: #2D4A5E;
+}
+
+/* Link */
 .tiptap a {
-  color: #37352F;
+  color: var(--n-text);
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
 }
 
 .tiptap a:hover {
-  color: #2EAADC;
+  color: var(--n-link);
+}
+
+/* PDF export styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+.pdf-export-container {
+  background: white;
+  color: #37352F;
+  font-family: 'Figtree', sans-serif;
+}
+
+.pdf-export-container h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2em;
+  font-weight: 700;
+  color: #1F1F1F;
+  margin-bottom: 0.3em;
+}
+
+.pdf-export-container h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5em;
+  font-weight: 600;
+  color: #1F1F1F;
+}
+
+.pdf-export-container h3 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.25em;
+  font-weight: 500;
+  color: #1F1F1F;
 }

@@ -26,6 +26,20 @@ function App() {
   const [selectedNoteId, setSelectedNoteId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('notesApp_theme');
+    return saved === 'dark';
+  });
+
+  // Apply dark mode class to html element
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('notesApp_theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
 
   // Close sidebar on mobile by default
   useEffect(() => {
@@ -117,7 +131,7 @@ function App() {
   );
 
   return (
-    <div className="h-screen w-full flex overflow-hidden bg-white text-[#37352F] font-body">
+    <div className="h-screen w-full flex overflow-hidden bg-[var(--n-bg)] text-[#37352F] font-body">
       <Sidebar
         notes={notes}
         folders={folders}
@@ -132,6 +146,8 @@ function App() {
         onOpenSearch={() => setSearchOpen(true)}
         onToggleSidebar={() => setSidebarOpen(false)}
         sidebarOpen={sidebarOpen}
+        darkMode={darkMode}
+        onToggleTheme={() => setDarkMode((d) => !d)}
       />
 
       {/* Main area */}
@@ -140,12 +156,12 @@ function App() {
         {!sidebarOpen && (
           <div
             data-testid="topbar"
-            className="flex items-center gap-2 px-3 py-2 border-b border-[#EBEBEA] bg-white"
+            className="flex items-center gap-2 px-3 py-2 border-b border-[var(--n-border)] bg-[var(--n-bg)]"
           >
             <button
               data-testid="open-sidebar-btn"
               onClick={() => setSidebarOpen(true)}
-              className="p-1.5 rounded-md text-[#787774] hover:bg-[#EFEFEF] hover:text-[#37352F] transition-colors"
+              className="p-1.5 rounded-md text-[var(--n-text-secondary)] hover:bg-[var(--n-hover)] hover:text-[var(--n-text)] transition-colors"
             >
               <PanelLeft className="w-4 h-4" strokeWidth={1.5} />
             </button>
@@ -183,9 +199,9 @@ function App() {
         position="bottom-right"
         toastOptions={{
           style: {
-            background: '#FFFFFF',
-            border: '1px solid #EBEBEA',
-            color: '#37352F',
+            background: 'var(--n-bg)',
+            border: '1px solid var(--n-border)',
+            color: 'var(--n-text)',
             fontFamily: 'Figtree, sans-serif',
           },
         }}

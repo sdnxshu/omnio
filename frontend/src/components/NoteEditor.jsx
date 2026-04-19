@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -7,6 +7,7 @@ import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Highlight from '@tiptap/extension-highlight';
 import Typography from '@tiptap/extension-typography';
+import html2pdf from 'html2pdf.js';
 import {
   Bold,
   Italic,
@@ -22,6 +23,8 @@ import {
   Code,
   Highlighter,
   Minus,
+  Download,
+  Loader2,
 } from 'lucide-react';
 import CoverPicker from './CoverPicker';
 import TagSelector, { TagBadge } from './TagSelector';
@@ -41,6 +44,7 @@ export default function NoteEditor({
 }) {
   const titleRef = useRef(null);
   const isInternalUpdate = useRef(false);
+  const [exporting, setExporting] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -81,6 +85,66 @@ export default function NoteEditor({
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [note?.id, editor]);
+
+  const handleExportPDF = useCallback(async () => {
+    if (!note || !editor) return;
+    setExporting(true);
+    try {
+      const container = document.createElement('div');
+      container.className = 'pdf-export-container';
+      container.style.padding = '40px';
+      container.style.maxWidth = '800px';
+      container.style.fontFamily = 'Figtree, sans-serif';
+      container.style.color = '#37352F';
+      container.style.background = '#FFFFFF';
+
+      const title = document.createElement('h1');
+      title.textContent = note.title || 'Untitled';
+      title.style.fontFamily = 'Outfit, sans-serif';
+      title.style.fontSize = '2.5em';
+      title.style.fontWeight = '700';
+      title.style.color = '#1F1F1F';
+      title.style.marginBottom = '8px';
+      title.style.letterSpacing = '-0.02em';
+      container.appendChild(title);
+
+      const date = document.createElement('p');
+      date.textContent = new Date(note.updatedAt).toLocaleDateString('en-US', {
+        month: 'long', day: 'numeric', year: 'numeric',
+      });
+      date.style.color = '#787774';
+      date.style.fontSize = '0.875rem';
+      date.style.marginBottom = '24px';
+      container.appendChild(date);
+
+      const hr = document.createElement('hr');
+      hr.style.border = 'none';
+      hr.style.borderTop = '1px solid #EBEBEA';
+      hr.style.marginBottom = '24px';
+      container.appendChild(hr);
+
+      const content = document.createElement('div');
+      content.innerHTML = editor.getHTML();
+      content.style.lineHeight = '1.7';
+      container.appendChild(content);
+
+      document.body.appendChild(container);
+
+      await html2pdf().set({
+        margin: [10, 10, 10, 10],
+        filename: `${(note.title || 'Untitled').replace(/[^a-zA-Z0-9 ]/g, '')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      }).from(container).save();
+
+      document.body.removeChild(container);
+    } catch (err) {
+      console.error('PDF export failed:', err);
+    } finally {
+      setExporting(false);
+    }
+  }, [note, editor]);
 
   const handleTitleChange = useCallback(
     (e) => {
@@ -126,7 +190,10 @@ export default function NoteEditor({
   const selectedTags = allTags.filter((t) => (note.tags || []).includes(t.id));
 
   return (
-    <div data-testid="note-editor" className="flex-1 h-full overflow-y-auto bg-white">
+    <div
+      data-testid="note-editor"
+      className="flex-1 h-full overflow-y-auto bg-[var(--n-bg)]"
+    >
       <CoverPicker
         coverImage={note.coverImage}
         onSelect={handleCoverSelect}
@@ -142,6 +209,19 @@ export default function NoteEditor({
             onToggleTag={handleToggleTag}
             onCreateTag={onCreateTag}
           />
+          <button
+            data-testid="export-pdf-btn"
+            onClick={handleExportPDF}
+            disabled={exporting}
+            className="flex items-center gap-1.5 text-xs text-[var(--n-text-secondary)] hover:text-[var(--n-text)] hover:bg-[var(--n-hover)] rounded-md px-2 py-1 transition-colors disabled:opacity-50"
+          >
+            {exporting ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" strokeWidth={1.5} />
+            ) : (
+              <Download className="w-3.5 h-3.5" strokeWidth={1.5} />
+            )}
+            {exporting ? 'Exporting...' : 'Export PDF'}
+          </button>
         </div>
 
         {/* Tags display */}
@@ -165,11 +245,11 @@ export default function NoteEditor({
           onChange={handleTitleChange}
           onKeyDown={handleTitleKeyDown}
           placeholder="Untitled"
-          className="w-full text-4xl sm:text-5xl font-heading font-bold text-[#1F1F1F] tracking-tight placeholder-[#E3E2E0] bg-transparent border-0 focus:outline-none focus:ring-0 mb-2 leading-tight"
+          className="w-full text-4xl sm:text-5xl font-heading font-bold text-[var(--n-text-title)] tracking-tight placeholder-[var(--n-placeholder)] bg-transparent border-0 focus:outline-none focus:ring-0 mb-2 leading-tight"
         />
 
         {/* Metadata */}
-        <p className="text-sm text-[#787774] mb-6">
+        <p className="text-sm text-[var(--n-text-secondary)] mb-6">
           {new Date(note.updatedAt).toLocaleDateString('en-US', {
             month: 'long',
             day: 'numeric',
@@ -180,7 +260,7 @@ export default function NoteEditor({
         {/* Formatting Toolbar */}
         <EditorToolbar editor={editor} />
 
-        <Separator className="mb-6 bg-[#EBEBEA]" />
+        <Separator className="mb-6 bg-[var(--n-border)]" />
 
         {/* Editor */}
         <EditorContent editor={editor} />
@@ -219,7 +299,7 @@ function EditorToolbar({ editor }) {
         {tools.map((tool, i) => {
           if (tool.type === 'sep') {
             return (
-              <div key={`sep-${i}`} className="w-px h-5 bg-[#EBEBEA] mx-1" />
+              <div key={`sep-${i}`} className="w-px h-5 bg-[var(--n-border)] mx-1" />
             );
           }
           const Icon = tool.icon;
@@ -231,8 +311,8 @@ function EditorToolbar({ editor }) {
                   onClick={tool.action}
                   className={`p-1.5 rounded-md transition-colors ${
                     tool.active
-                      ? 'bg-[#EFEFEF] text-[#1F1F1F]'
-                      : 'text-[#787774] hover:bg-[#EFEFEF] hover:text-[#37352F]'
+                      ? 'bg-[var(--n-hover)] text-[var(--n-text-title)]'
+                      : 'text-[var(--n-text-secondary)] hover:bg-[var(--n-hover)] hover:text-[var(--n-text)]'
                   }`}
                 >
                   <Icon className="w-4 h-4" strokeWidth={1.5} />

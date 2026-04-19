@@ -34,7 +34,7 @@ export default function CoverPicker({ coverImage, onSelect, onRemove }) {
     <div data-testid="cover-picker" className="relative group">
       {coverImage ? (
         <div className="relative">
-          <div className="h-48 md:h-56 w-full overflow-hidden border-b border-[#EBEBEA]">
+          <div className="h-48 md:h-56 w-full overflow-hidden border-b border-[var(--n-border)]">
             {coverImage.startsWith('#') ? (
               <div className="w-full h-full" style={{ backgroundColor: coverImage }} />
             ) : (
@@ -50,21 +50,21 @@ export default function CoverPicker({ coverImage, onSelect, onRemove }) {
               <PopoverTrigger asChild>
                 <button
                   data-testid="change-cover-btn"
-                  className="px-3 py-1.5 text-xs font-medium bg-white/90 backdrop-blur-sm rounded-md hover:bg-white transition-colors shadow-sm border border-[#EBEBEA]"
+                  className="px-3 py-1.5 text-xs font-medium bg-[var(--n-bg)]/90 backdrop-blur-sm rounded-md hover:bg-[var(--n-bg)] transition-colors shadow-sm border border-[var(--n-border)]"
                 >
                   Change cover
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-80 p-3 bg-white border-[#EBEBEA] rounded-xl shadow-lg" align="end">
+              <PopoverContent className="w-80 p-3 bg-[var(--n-bg)] border-[var(--n-border)] rounded-xl shadow-lg" align="end">
                 <CoverOptions onSelect={onSelect} />
               </PopoverContent>
             </Popover>
             <button
               data-testid="remove-cover-btn"
               onClick={onRemove}
-              className="px-2 py-1.5 bg-white/90 backdrop-blur-sm rounded-md hover:bg-white transition-colors shadow-sm border border-[#EBEBEA]"
+              className="px-2 py-1.5 bg-[var(--n-bg)]/90 backdrop-blur-sm rounded-md hover:bg-[var(--n-bg)] transition-colors shadow-sm border border-[var(--n-border)]"
             >
-              <X className="w-3.5 h-3.5 text-[#787774]" strokeWidth={1.5} />
+              <X className="w-3.5 h-3.5 text-[var(--n-text-secondary)]" strokeWidth={1.5} />
             </button>
           </div>
         </div>
@@ -74,13 +74,13 @@ export default function CoverPicker({ coverImage, onSelect, onRemove }) {
             <PopoverTrigger asChild>
               <button
                 data-testid="add-cover-btn"
-                className="flex items-center gap-1.5 text-xs text-[#787774] hover:text-[#37352F] hover:bg-[#EFEFEF] rounded-md px-2 py-1 transition-colors"
+                className="flex items-center gap-1.5 text-xs text-[var(--n-text-secondary)] hover:text-[var(--n-text)] hover:bg-[var(--n-hover)] rounded-md px-2 py-1 transition-colors"
               >
                 <ImageIcon className="w-3.5 h-3.5" strokeWidth={1.5} />
                 Add cover
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 p-3 bg-white border-[#EBEBEA] rounded-xl shadow-lg" align="start">
+            <PopoverContent className="w-80 p-3 bg-[var(--n-bg)] border-[var(--n-border)] rounded-xl shadow-lg" align="start">
               <CoverOptions onSelect={onSelect} />
             </PopoverContent>
           </Popover>
@@ -93,27 +93,27 @@ export default function CoverPicker({ coverImage, onSelect, onRemove }) {
 function CoverOptions({ onSelect }) {
   return (
     <div data-testid="cover-options">
-      <p className="text-xs font-medium text-[#787774] mb-2 px-1">Photos</p>
+      <p className="text-xs font-medium text-[var(--n-text-secondary)] mb-2 px-1">Photos</p>
       <div className="grid grid-cols-3 gap-1.5 mb-3">
         {DEFAULT_COVERS.map((cover) => (
           <button
             key={cover.url}
             data-testid={`cover-photo-${cover.label.toLowerCase()}`}
             onClick={() => onSelect(cover.url)}
-            className="h-14 rounded-md overflow-hidden hover:ring-2 hover:ring-[#37352F] transition-all"
+            className="h-14 rounded-md overflow-hidden hover:ring-2 hover:ring-[var(--n-text)] transition-all"
           >
             <img src={cover.url} alt={cover.label} className="w-full h-full object-cover" />
           </button>
         ))}
       </div>
-      <p className="text-xs font-medium text-[#787774] mb-2 px-1">Colors</p>
+      <p className="text-xs font-medium text-[var(--n-text-secondary)] mb-2 px-1">Colors</p>
       <div className="grid grid-cols-6 gap-1.5">
         {COLOR_COVERS.map((cover) => (
           <button
             key={cover.color}
             data-testid={`cover-color-${cover.label.toLowerCase()}`}
             onClick={() => onSelect(cover.color)}
-            className="h-8 rounded-md hover:ring-2 hover:ring-[#37352F] transition-all"
+            className="h-8 rounded-md hover:ring-2 hover:ring-[var(--n-text)] transition-all"
             style={{ backgroundColor: cover.color }}
             title={cover.label}
           />
