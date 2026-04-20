@@ -17,6 +17,8 @@ import {
   deleteFolder,
   getTags,
   createTag,
+  duplicateNote,
+  moveNote,
 } from '@/lib/storage';
 
 function App() {
@@ -129,6 +131,26 @@ function App() {
     [refresh]
   );
 
+  const handleDuplicateNote = useCallback(
+    (id) => {
+      const copy = duplicateNote(id);
+      if (copy) {
+        refresh();
+        setSelectedNoteId(copy.id);
+        toast('Note duplicated', { description: 'A copy has been created.' });
+      }
+    },
+    [refresh]
+  );
+
+  const handleMoveNote = useCallback(
+    (noteId, targetFolderId, targetParentNoteId = null) => {
+      moveNote(noteId, targetFolderId, targetParentNoteId);
+      refresh();
+    },
+    [refresh]
+  );
+
   return (
     <div className="h-screen w-full flex overflow-hidden bg-[var(--n-bg)] text-[#37352F] font-body">
       <Sidebar
@@ -142,6 +164,8 @@ function App() {
         onCreateFolder={handleCreateFolder}
         onRenameFolder={handleRenameFolder}
         onDeleteFolder={handleDeleteFolder}
+        onMoveNote={handleMoveNote}
+        onDuplicateNote={handleDuplicateNote}
         onOpenSearch={() => setSearchOpen(true)}
         onToggleSidebar={() => setSidebarOpen(false)}
         sidebarOpen={sidebarOpen}
@@ -184,6 +208,7 @@ function App() {
             onCreateTag={handleCreateTag}
             onCreateSubPage={(parentId) => handleCreateNote(selectedNote.folderId, parentId)}
             onSelectNote={handleSelectNote}
+            onDuplicateNote={handleDuplicateNote}
           />
         ) : (
           <EmptyState onCreateNote={() => handleCreateNote(null)} />

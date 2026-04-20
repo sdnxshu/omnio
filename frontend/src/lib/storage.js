@@ -171,6 +171,40 @@ export function updateTag(id, updates) {
   return tags[idx];
 }
 
+export function duplicateNote(id) {
+  const notes = getNotes();
+  const original = notes.find((n) => n.id === id);
+  if (!original) return null;
+  const copy = {
+    id: uuidv4(),
+    title: (original.title || 'Untitled') + ' (copy)',
+    content: original.content ? JSON.parse(JSON.stringify(original.content)) : null,
+    folderId: original.folderId,
+    parentNoteId: original.parentNoteId,
+    tags: [...(original.tags || [])],
+    coverImage: original.coverImage,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  notes.unshift(copy);
+  saveAll(KEYS.notes, notes);
+  return copy;
+}
+
+export function moveNote(noteId, targetFolderId, targetParentNoteId = null) {
+  const notes = getNotes();
+  const idx = notes.findIndex((n) => n.id === noteId);
+  if (idx === -1) return null;
+  notes[idx] = {
+    ...notes[idx],
+    folderId: targetFolderId,
+    parentNoteId: targetParentNoteId,
+    updatedAt: new Date().toISOString(),
+  };
+  saveAll(KEYS.notes, notes);
+  return notes[idx];
+}
+
 // Search notes
 export function searchNotes(query) {
   if (!query.trim()) return [];

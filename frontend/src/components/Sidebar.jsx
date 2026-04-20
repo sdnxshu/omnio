@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Search, Plus, FileText, Folder, FolderOpen,
   ChevronRight, MoreHorizontal, Trash2, Pencil,
-  PanelLeftClose, FolderPlus, ChevronDown, Sun, Moon, FilePlus,
+  PanelLeftClose, FolderPlus, ChevronDown, Sun, Moon, FilePlus, Copy,
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -14,14 +14,16 @@ import { TagBadge } from './TagSelector';
 export default function Sidebar({
   notes, folders, tags, selectedNoteId,
   onSelectNote, onCreateNote, onDeleteNote,
-  onCreateFolder, onRenameFolder, onDeleteFolder,
+  onCreateFolder, onRenameFolder, onDeleteFolder, onMoveNote,
   onOpenSearch, onToggleSidebar, sidebarOpen,
-  darkMode, onToggleTheme,
+  darkMode, onToggleTheme, onDuplicateNote,
 }) {
   const [expanded, setExpanded] = useState({});
   const [renamingId, setRenamingId] = useState(null);
   const [renameVal, setRenameVal] = useState('');
   const renameRef = useRef(null);
+  const [draggedNoteId, setDraggedNoteId] = useState(null);
+  const [dropTarget, setDropTarget] = useState(null);
 
   useEffect(() => {
     if (renamingId && renameRef.current) {
@@ -48,6 +50,37 @@ export default function Sidebar({
     setRenamingId(null);
     setRenameVal('');
   }, [renamingId, renameVal, onRenameFolder]);
+
+  const handleDragStart = useCallback((e, noteId) => {
+    setDraggedNoteId(noteId);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', noteId);
+  }, []);
+
+  const handleDragOver = useCallback((e, targetId) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDropTarget(targetId);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setDropTarget(null);
+  }, []);
+
+  const handleDrop = useCallback((e, targetFolderId) => {
+    e.preventDefault();
+    const noteId = e.dataTransfer.getData('text/plain');
+    if (noteId && noteId !== targetFolderId) {
+      onMoveNote(noteId, targetFolderId, null);
+    }
+    setDraggedNoteId(null);
+    setDropTarget(null);
+  }, [onMoveNote]);
+
+  const handleDragEnd = useCallback(() => {
+    setDraggedNoteId(null);
+    setDropTarget(null);
+  }, []);
 
   const rootFolders = folders.filter((f) => !f.parentId);
   const unorganizedNotes = notes.filter((n) => !n.folderId && !n.parentNoteId);
@@ -94,9 +127,14 @@ export default function Sidebar({
 
     return (
       <div key={note.id} data-testid={`note-item-${note.id}`}>
-        <div className={`flex items-center group rounded-md cursor-pointer transition-colors ${
-          isSelected ? 'bg-[var(--n-active)]' : 'hover:bg-[var(--n-hover)]'
-        }`}>
+        <div
+          className={`flex items-center group rounded-md cursor-pointer transition-colors ${
+            isSelected ? 'bg-[var(--n-active)]' : 'hover:bg-[var(--n-hover)]'
+          } ${draggedNoteId === note.id ? 'opacity-40' : ''}`}
+          draggable
+          onDragStart={(e) => handleDragStart(e, note.id)}
+          onDragEnd={handleDragEnd}
+        >
           {hasChildren ? (
             <button
               data-testid={`note-toggle-${note.id}`}
@@ -141,6 +179,11 @@ export default function Sidebar({
                 className="gap-2 text-[var(--n-text)] cursor-pointer">
                 <FilePlus className="w-4 h-4" strokeWidth={1.5} /> Add sub-page
               </DropdownMenuItem>
+              <DropdownMenuItem data-testid={`note-duplicate-${note.id}`}
+                onClick={() => onDuplicateNote(note.id)}
+                className="gap-2 text-[var(--n-text)] cursor-pointer">
+                <Copy className="w-4 h-4" strokeWidth={1.5} /> Duplicate
+              </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-[var(--n-border)]" />
               <DropdownMenuItem data-testid={`note-delete-${note.id}`} onClick={() => onDeleteNote(note.id)}
                 className="gap-2 text-red-600 cursor-pointer focus:text-red-600">
@@ -166,7 +209,14 @@ export default function Sidebar({
 
     return (
       <div key={folder.id} data-testid={`folder-${folder.id}`}>
-        <div className="flex items-center group">
+        <div
+          className={`flex items-center group ${
+            dropTarget === folder.id ? 'bg-[var(--n-hover)] rounded-md ring-2 ring-blue-400/50' : ''
+          }`}
+          onDragOver={(e) => handleDragOver(e, folder.id)}
+          onDragLeave={handleDragLeave}
+          onDrop={(e) => handleDrop(e, folder.id)}
+        >
           <button
             data-testid={`folder-toggle-${folder.id}`}
             onClick={() => toggle(folder.id)}
@@ -292,14 +342,18 @@ export default function Sidebar({
       <ScrollArea className="flex-1">
         <div className="px-2 py-1">
           {rootFolders.map((f) => renderFolder(f, 0))}
-          {unorganizedNotes.length > 0 && (
-            <div data-testid="unorganized-section">
-              {rootFolders.length > 0 && (
-                <p className="text-[10px] font-medium text-[var(--n-text-secondary)] uppercase tracking-wider px-2 pt-3 pb-1">Pages</p>
-              )}
-              {unorganizedNotes.map((n) => renderNoteItem(n))}
-            </div>
-          )}
+          <div
+            data-testid="unorganized-section"
+            onDragOver={(e) => handleDragOver(e, '__unorganized__')}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, null)}
+            className={`min-h-[32px] ${dropTarget === '__unorganized__' ? 'bg-[var(--n-hover)] rounded-md ring-2 ring-blue-400/50' : ''}`}
+          >
+            {(unorganizedNotes.length > 0 || rootFolders.length > 0) && (
+              <p className="text-[10px] font-medium text-[var(--n-text-secondary)] uppercase tracking-wider px-2 pt-3 pb-1">Pages</p>
+            )}
+            {unorganizedNotes.map((n) => renderNoteItem(n))}
+          </div>
           {notes.length === 0 && folders.length === 0 && (
             <div className="text-center py-8 px-4">
               <p className="text-xs text-[var(--n-text-secondary)]">No pages yet</p>

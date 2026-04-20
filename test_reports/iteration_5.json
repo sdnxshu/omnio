@@ -1,0 +1,40 @@
+{
+  "summary": "Frontend-only testing of 3 new features (markdown shortcuts, note duplication, drag & drop) plus regression on existing features. All scenarios from the review request PASSED. Cleared localStorage at test start and reloaded for a clean state.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Sidebar.jsx toggle() initial-expand logic is confusing: expanded[id] === false toggles to true, which means first click on a NOT-yet-expanded folder starts it closed (undefined -> false). However for folders the default state is rendered as open (isOpen = expanded[folder.id] !== false), so first click correctly collapses. This works but is asymmetric vs toggleNote() for sub-pages (expanded[id] !== true default closed). Consider consistent boolean handling.",
+    "moveNote() always sets parentNoteId to null when dragging onto a folder, which means drag&drop cannot preserve sub-page hierarchy. Acceptable for MVP but flag: dragging a parent note loses its sub-pages relation if they are not moved together. Currently only the dragged note's folderId/parentNoteId is reassigned; its descendants are orphaned from the folder (they stay in their original folderId). Consider cascading moves for children.",
+    "duplicateNote() does not duplicate descendant sub-pages. Duplicating a parent note gives you a shallow copy without its sub-pages. May be intentional but worth confirming product expectation.",
+    "storage.js getAll() does not try/catch JSON.parse - malformed localStorage will crash the app on load. Low risk but add safety parse."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend-only)", "frontend": "100%"},
+  "seed_data_creation": "localStorage-only test data created during the test: 'Markdown Test' note with duplicates, 'Target Folder' folder, 'Drag Me' note. Cleared between phases.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All 3 new features working. Markdown shortcuts tested via keyboard typing into .tiptap editor (InputRules fire). Duplicate via menu-duplicate and note-duplicate-{id}. Drag & drop tested via page.drag_and_drop(note_selector, folder_selector) which correctly simulates HTML5 drag events in tiptap/react. Verify folderId in localStorage after drop. Always page.evaluate('localStorage.clear()') then reload before a new test phase.",
+  "test_results_detail": {
+    "markdown_h1": "PASS - <h1> rendered",
+    "markdown_h2": "PASS - <h2> rendered",
+    "markdown_h3": "PASS - <h3> rendered",
+    "markdown_bullet_list": "PASS - <ul> rendered",
+    "markdown_ordered_list": "PASS - <ol> rendered",
+    "markdown_blockquote": "PASS - <blockquote> rendered",
+    "markdown_hr": "PASS - <hr> rendered after typing ---",
+    "markdown_bold": "PASS - <strong> rendered from **text**",
+    "markdown_italic": "PASS - <em> rendered from *text*",
+    "duplicate_via_ellipsis": "PASS - sidebar shows 'Markdown Test (copy)', duplicate selected with title+content carried",
+    "duplicate_via_sidebar_context": "PASS - note-duplicate-{id} creates 'Markdown Test (copy) (copy)'",
+    "drag_note_to_folder": "PASS - note.folderId updated to target folder id in localStorage",
+    "drag_note_back_to_unorganized": "PASS - note.folderId becomes null after dropping on unorganized-section",
+    "search_dialog": "PASS - opens on search-trigger",
+    "dark_mode_toggle": "PASS - html.dark class toggles"
+  }
+}

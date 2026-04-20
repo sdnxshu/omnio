@@ -11,7 +11,7 @@ import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough,
   Heading1, Heading2, Heading3, List, ListOrdered, ListChecks,
   Quote, Code, Highlighter, Minus, Download, Loader2,
-  MoreHorizontal, FilePlus, FileText, ChevronRight, Home,
+  MoreHorizontal, FilePlus, FileText, ChevronRight, Home, Copy,
 } from 'lucide-react';
 import CoverPicker from './CoverPicker';
 import TagSelector, { TagBadge } from './TagSelector';
@@ -26,7 +26,7 @@ import {
 
 export default function NoteEditor({
   note, allTags, allNotes, allFolders, onUpdateNote, onCreateTag,
-  onCreateSubPage, onSelectNote,
+  onCreateSubPage, onSelectNote, onDuplicateNote,
 }) {
   const titleRef = useRef(null);
   const isInternalUpdate = useRef(false);
@@ -227,6 +227,14 @@ export default function NoteEditor({
             >
               <FilePlus className="w-4 h-4" strokeWidth={1.5} />
               Add sub-page
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              data-testid="menu-duplicate"
+              onClick={() => onDuplicateNote(note.id)}
+              className="gap-2 text-[var(--n-text)] cursor-pointer"
+            >
+              <Copy className="w-4 h-4" strokeWidth={1.5} />
+              Duplicate
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-[var(--n-border)]" />
             <DropdownMenuItem
